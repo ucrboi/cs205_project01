@@ -1,5 +1,5 @@
 // https://www.cs.princeton.edu/courses/archive/spring21/cos226/assignments/8puzzle/specification.php
-function isSolvable(arr: number[]): boolean {
+export function isSolvable(arr: number[]): boolean {
   const blankIndex = arr.findIndex((el) => el === -1);
   const boardSize = Math.sqrt(arr.length);
   const res = arr.filter((el) => el !== -1);
