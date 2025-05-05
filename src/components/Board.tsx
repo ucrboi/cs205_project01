@@ -16,7 +16,7 @@ function Board({ n, boardState }: BoardProps) {
     <div
       className={`grid ${
         boardSize === 3 ? "grid-cols-3" : "grid-cols-4"
-      } gap-1 w-[50vw] aspect-square mx-auto mb-14`}
+      } gap-1 w-[50vw] md:w-[30vw]  aspect-square mx-auto mb-14`}
     >
       {boardState.map((t) => {
         if (t === -1) {

@@ -1,6 +1,10 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useRef } from "react";
 import randomOrderGenerator from "../utils/randomOrderGenerator";
-import { UniformCostSearch } from "../utils/algorithms";
+import {
+  AStarManhattan,
+  AStarMisplacedTile,
+  UniformCostSearch,
+} from "../utils/algorithms";
 
 interface ControlPanelProps {
   n: number;
@@ -21,16 +25,32 @@ function ControlPanel({
   isSolving,
   setIsSolving,
 }: ControlPanelProps) {
+  const algRef = useRef<HTMLSelectElement>(null);
+
   const solvePuzzle = () => {
     setIsSolving(true);
-    const result = UniformCostSearch(boardState);
+    const algorithm = algRef.current?.value;
+
+    if (!algorithm) {
+      setIsSolving(false);
+      console.log("Please select an algorithm");
+      return;
+    }
+
+    let result;
+    if (algorithm === "ucs") {
+      result = UniformCostSearch(boardState);
+    } else if (algorithm === "misplaced") {
+      result = AStarMisplacedTile(boardState);
+    } else if (algorithm === "manhattan") {
+      result = AStarManhattan(boardState);
+    }
+
     if (result) {
       console.log(`Expanded: ${result.expandedNodes}`);
       console.log(`Depth:    ${result.solutionDepth}`);
       console.log(`Path:`);
       result.solutionPath.forEach((s) => console.log(s));
-    } else {
-      console.log("No solution!");
     }
     setIsSolving(false);
   };
@@ -66,11 +86,12 @@ function ControlPanel({
         <select
           className="col-span-2 outline outline-emerald-500 text-emerald-200 disabled:outline-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed border-x-8 border-transparent rounded-lg p-2"
           disabled={isSolving}
+          ref={algRef}
         >
-          <option>Select an algorithm</option>
-          <option>Uniform Cost Search</option>
-          <option>A* (Misplaced Tile)</option>
-          <option>A* (Manhattan Distance)</option>
+          <option value="">Select an algorithm</option>
+          <option value="ucs">Uniform Cost Search</option>
+          <option value="misplaced">A* (Misplaced Tile)</option>
+          <option value="manhattan">A* (Manhattan Distance)</option>
         </select>
         <button
           className="outline rounded-lg bg-emerald-500 text-neutral-900 cursor-pointer disabled:bg-emerald-800 disabled:cursor-not-allowe"

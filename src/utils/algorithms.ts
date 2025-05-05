@@ -1,11 +1,11 @@
 interface Node {
   state: number[];
   parent: Node | null;
+  g: number;
   cost: number;
   depth: number;
 }
 
-// Simple binary‐heap min‑priority‑queue on Node.cost
 class MinPQ {
   private heap: Node[] = [];
 
@@ -66,33 +66,33 @@ function isGoal(state: number[], goal: number[]): boolean {
   return state.join(",") === goal.join(",");
 }
 
-export function UniformCostSearch(intialState: number[]) {
-  const goal = getGoalState(intialState.length);
+export function UniformCostSearch(initialState: number[]) {
+  const goal = getGoalState(initialState.length);
   const queue = new MinPQ();
   const explored = new Map<string, number>();
   let expanded = 0;
 
   const initialNode = {
-    state: intialState,
+    state: initialState,
     parent: null,
+    g: 0,
     cost: 0,
     depth: 0,
   } as Node;
 
-  explored.set(intialState.join(","), 0);
+  explored.set(initialState.join(","), 0);
   queue.insert(initialNode);
 
   while (!queue.isEmpty()) {
-    const node = queue.extractMin();
-    if (!node) {
-      break;
-    }
+    const node = queue.extractMin()!;
+    const key = node.state.join(",");
 
-    if (node.cost > (explored.get(node.state.join(",")) ?? Infinity)) {
+    if (node.cost > (explored.get(key) ?? Infinity)) {
       continue;
     }
 
-    expanded += 1;
+    expanded++;
+
     if (isGoal(node.state, goal)) {
       const path: number[][] = [];
       let cur: Node | null = node;
@@ -112,37 +112,226 @@ export function UniformCostSearch(intialState: number[]) {
     const blankIndex = node.state.indexOf(-1);
     const row = Math.floor(blankIndex / 3),
       col = blankIndex % 3;
-    const moves = [
+
+    for (const { dr, dc } of [
       { dr: -1, dc: 0 },
       { dr: +1, dc: 0 },
       { dr: 0, dc: -1 },
       { dr: 0, dc: +1 },
-    ];
-
-    for (const { dr, dc } of moves) {
+    ]) {
       const nr = row + dr,
         nc = col + dc;
-      if (nr >= 0 && nr < 3 && nc >= 0 && nc < 3) {
-        const swapIdx = nr * 3 + nc;
-        const nextState = node.state.slice();
-        [nextState[blankIndex], nextState[swapIdx]] = [
-          nextState[swapIdx],
-          nextState[blankIndex],
-        ];
+      if (nr < 0 || nr > 2 || nc < 0 || nc > 2) continue;
 
-        const child = {
+      const swapIdx = nr * 3 + nc;
+      const nextState = node.state.slice();
+      [nextState[blankIndex], nextState[swapIdx]] = [
+        nextState[swapIdx],
+        nextState[blankIndex],
+      ];
+
+      const g = node.g + 1;
+      const cKey = nextState.join(",");
+      const prevG = explored.get(cKey);
+      if (prevG === undefined || g + 1 < prevG) {
+        explored.set(cKey, g);
+        const child: Node = {
           state: nextState,
           parent: node,
+          g,
           cost: node.cost + 1,
           depth: node.depth + 1,
-        } as Node;
+        };
+        queue.insert(child);
+      }
+    }
+  }
+}
 
-        const cKey = child.state.join(",");
-        const prevCost = explored.get(cKey);
-        if (prevCost === undefined || child.cost < prevCost) {
-          explored.set(cKey, child.cost);
-          queue.insert(child);
-        }
+function misplacedTiles(state: number[], goal: number[]): number {
+  let h = 0;
+  for (let i = 0; i < state.length; i++) {
+    if (state[i] !== -1 && state[i] !== goal[i]) h++;
+  }
+  return h;
+}
+
+export function AStarMisplacedTile(initialState: number[]) {
+  const goal = getGoalState(initialState.length);
+  const queue = new MinPQ();
+  const explored = new Map<string, number>();
+  let expanded = 0;
+
+  const initH = misplacedTiles(initialState, goal);
+  const initialNode = {
+    state: initialState,
+    parent: null,
+    g: 0,
+    cost: initH,
+    depth: 0,
+  } as Node;
+
+  explored.set(initialState.join(","), 0);
+  queue.insert(initialNode);
+
+  while (!queue.isEmpty()) {
+    const node = queue.extractMin()!;
+    const key = node.state.join(",");
+
+    if (node.g > (explored.get(key) ?? Infinity)) {
+      continue;
+    }
+
+    expanded++;
+
+    if (isGoal(node.state, goal)) {
+      const path: number[][] = [];
+      let cur: Node | null = node;
+      while (cur) {
+        path.unshift(cur.state);
+        cur = cur.parent;
+      }
+      return {
+        expandedNodes: expanded,
+        solutionDepth: node.depth,
+        solutionPath: path,
+      };
+    }
+
+    const blankIndex = node.state.indexOf(-1);
+    const row = Math.floor(blankIndex / 3),
+      col = blankIndex % 3;
+    for (const { dr, dc } of [
+      { dr: -1, dc: 0 },
+      { dr: +1, dc: 0 },
+      { dr: 0, dc: -1 },
+      { dr: 0, dc: +1 },
+    ]) {
+      const nr = row + dr,
+        nc = col + dc;
+      if (nr < 0 || nr > 2 || nc < 0 || nc > 2) continue;
+
+      const swapIdx = nr * 3 + nc;
+      const nextState = node.state.slice();
+      [nextState[blankIndex], nextState[swapIdx]] = [
+        nextState[swapIdx],
+        nextState[blankIndex],
+      ];
+
+      const g = node.g + 1;
+      const h = misplacedTiles(nextState, goal);
+      const f = g + h;
+
+      const cKey = nextState.join(",");
+      const prevG = explored.get(cKey);
+      if (prevG === undefined || g < prevG) {
+        explored.set(cKey, g);
+        const child: Node = {
+          state: nextState,
+          parent: node,
+          g,
+          cost: f,
+          depth: node.depth + 1,
+        };
+        queue.insert(child);
+      }
+    }
+  }
+}
+
+function manhattanDistance(state: number[], goalPos: number[]): number {
+  let h = 0;
+  for (let i = 0; i < state.length; i++) {
+    const tile = state[i];
+    if (tile === -1) continue;
+    const goalIdx = goalPos.indexOf(tile)!;
+    const r1 = Math.floor(i / 3),
+      c1 = i % 3;
+    const r2 = Math.floor(goalIdx / 3),
+      c2 = goalIdx % 3;
+    h += Math.abs(r1 - r2) + Math.abs(c1 - c2);
+  }
+  return h;
+}
+
+export function AStarManhattan(initialState: number[]) {
+  const goal = getGoalState(initialState.length);
+  const queue = new MinPQ();
+  const explored = new Map<string, number>();
+  let expanded = 0;
+
+  const initH = manhattanDistance(initialState, goal);
+  const initialNode = {
+    state: initialState,
+    parent: null,
+    g: 0,
+    cost: initH,
+    depth: 0,
+  } as Node;
+
+  explored.set(initialState.join(","), 0);
+  queue.insert(initialNode);
+
+  while (!queue.isEmpty()) {
+    const node = queue.extractMin()!;
+    const key = node.state.join(",");
+
+    if (node.g > (explored.get(key) ?? Infinity)) {
+      continue;
+    }
+
+    expanded++;
+
+    if (isGoal(node.state, goal)) {
+      const path: number[][] = [];
+      let cur: Node | null = node;
+      while (cur) {
+        path.unshift(cur.state);
+        cur = cur.parent;
+      }
+      return {
+        expandedNodes: expanded,
+        solutionDepth: node.depth,
+        solutionPath: path,
+      };
+    }
+
+    const blankIdx = node.state.indexOf(-1);
+    const row = Math.floor(blankIdx / 3),
+      col = blankIdx % 3;
+    for (const { dr, dc } of [
+      { dr: -1, dc: 0 },
+      { dr: +1, dc: 0 },
+      { dr: 0, dc: -1 },
+      { dr: 0, dc: +1 },
+    ]) {
+      const nr = row + dr,
+        nc = col + dc;
+      if (nr < 0 || nr > 2 || nc < 0 || nc > 2) continue;
+
+      const swapIdx = nr * 3 + nc;
+      const nextState = node.state.slice();
+      [nextState[blankIdx], nextState[swapIdx]] = [
+        nextState[swapIdx],
+        nextState[blankIdx],
+      ];
+
+      const g = node.g + 1;
+      const h = manhattanDistance(nextState, goal);
+      const f = g + h;
+
+      const cKey = nextState.join(",");
+      const prevG = explored.get(cKey);
+      if (prevG === undefined || g < prevG) {
+        explored.set(cKey, g);
+        const child: Node = {
+          state: nextState,
+          parent: node,
+          g: g,
+          cost: f,
+          depth: node.depth + 1,
+        };
+        queue.insert(child);
       }
     }
   }
