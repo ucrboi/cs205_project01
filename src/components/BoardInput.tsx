@@ -5,6 +5,7 @@ interface BoardInputProps {
   n: number;
   boardState: number[];
   setBoardState: Dispatch<SetStateAction<number[]>>;
+  setInitialState: Dispatch<SetStateAction<number[]>>;
   setIsEditing: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -12,6 +13,7 @@ function BoardInput({
   n,
   boardState,
   setBoardState,
+  setInitialState,
   setIsEditing,
 }: BoardInputProps) {
   const [boardSize, setBoardSize] = useState<number>(n);
@@ -62,6 +64,7 @@ function BoardInput({
 
     setError("");
     setBoardState(parsed);
+    setInitialState(parsed);
     setIsEditing(false);
   };
 

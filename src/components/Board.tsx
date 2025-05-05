@@ -1,9 +1,16 @@
+import * as motion from "motion/react-client";
 import { useState, useEffect } from "react";
 
 interface BoardProps {
   n: number;
   boardState: number[];
 }
+
+const spring = {
+  type: "spring",
+  damping: 20,
+  stiffness: 300,
+};
 
 function Board({ n, boardState }: BoardProps) {
   const [boardSize, setBoardSize] = useState<number>(n);
@@ -21,20 +28,24 @@ function Board({ n, boardState }: BoardProps) {
       {boardState.map((t) => {
         if (t === -1) {
           return (
-            <div
+            <motion.li
               key={t}
+              layout
+              transition={spring}
               className="rounded-sm h-full w-full flex items-center justify-center"
-            ></div>
+            ></motion.li>
           );
         }
 
         return (
-          <div
+          <motion.li
             key={t}
+            layout
+            transition={spring}
             className="border rounded-sm h-full w-full flex items-center justify-center bg-slate-700 text-2xl text-bold"
           >
             {t}
-          </div>
+          </motion.li>
         );
       })}
     </div>

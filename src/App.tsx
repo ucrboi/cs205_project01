@@ -7,6 +7,7 @@ const finalState = [1, 2, 3, 4, 5, 6, 7, 8, -1];
 
 function App() {
   const [boardState, setBoardState] = useState(finalState);
+  const [initialState, setInitialState] = useState(boardState);
   const [isEditing, setIsEditing] = useState(false);
   const [isSolving, setIsSolving] = useState(false);
 
@@ -20,6 +21,7 @@ function App() {
         <BoardInput
           n={Math.ceil(Math.sqrt(boardState.length))}
           boardState={boardState}
+          setInitialState={setInitialState}
           setBoardState={setBoardState}
           setIsEditing={setIsEditing}
         />
@@ -31,6 +33,8 @@ function App() {
       )}
       <ControlPanel
         n={Math.ceil(Math.sqrt(boardState.length))}
+        initialState={initialState}
+        setInitialState={setInitialState}
         boardState={boardState}
         setBoardState={setBoardState}
         isEditing={isEditing}

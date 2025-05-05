@@ -8,6 +8,8 @@ import {
 
 interface ControlPanelProps {
   n: number;
+  initialState: number[];
+  setInitialState: Dispatch<SetStateAction<number[]>>;
   boardState: number[];
   setBoardState: Dispatch<SetStateAction<number[]>>;
   isEditing: boolean;
@@ -18,6 +20,8 @@ interface ControlPanelProps {
 
 function ControlPanel({
   n,
+  initialState,
+  setInitialState,
   boardState,
   setBoardState,
   isEditing,
@@ -29,6 +33,9 @@ function ControlPanel({
 
   const solvePuzzle = () => {
     setIsSolving(true);
+    setInitialState(boardState);
+    console.clear();
+    console.log("Solving...");
     const algorithm = algRef.current?.value;
 
     if (!algorithm) {
@@ -38,21 +45,31 @@ function ControlPanel({
     }
 
     let result;
+    let title = "";
     if (algorithm === "ucs") {
+      title = "Uniform Cost Search";
       result = UniformCostSearch(boardState);
     } else if (algorithm === "misplaced") {
+      title = "A* search with Misplaced Tile";
       result = AStarMisplacedTile(boardState);
     } else if (algorithm === "manhattan") {
+      title = "A* search with Manhattan Distance";
       result = AStarManhattan(boardState);
     }
 
-    if (result) {
-      console.log(`Expanded: ${result.expandedNodes}`);
-      console.log(`Depth:    ${result.solutionDepth}`);
-      console.log(`Path:`);
-      result.solutionPath.forEach((s) => console.log(s));
-    }
-    setIsSolving(false);
+    console.log(title);
+    console.log(`Expanded: ${result?.expandedNodes}`);
+    console.log(`Depth:    ${result?.solutionDepth}`);
+    console.log("Solved");
+
+    result?.solutionPath.forEach((state, index, array) => {
+      setTimeout(() => {
+        if (index === array.length - 1) {
+          setIsSolving(false);
+        }
+        setBoardState([...state]);
+      }, 300 * (index + 1));
+    });
   };
 
   return (
@@ -64,6 +81,7 @@ function ControlPanel({
             e.preventDefault();
             const arr = randomOrderGenerator(n);
             setBoardState([...arr]);
+            setInitialState([...arr]);
           }}
           disabled={isSolving}
         >
@@ -84,7 +102,7 @@ function ControlPanel({
       </div>
       <div className="grid grid-cols-3 gap-4">
         <select
-          className="col-span-2 outline outline-emerald-500 text-emerald-200 disabled:outline-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed border-x-8 border-transparent rounded-lg p-2"
+          className="col-span-1 outline outline-emerald-500 text-emerald-200 disabled:outline-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed border-x-8 border-transparent rounded-lg p-2"
           disabled={isSolving}
           ref={algRef}
         >
@@ -94,7 +112,7 @@ function ControlPanel({
           <option value="manhattan">A* (Manhattan Distance)</option>
         </select>
         <button
-          className="outline rounded-lg bg-emerald-500 text-neutral-900 cursor-pointer disabled:bg-emerald-800 disabled:cursor-not-allowe"
+          className="outline rounded-lg bg-emerald-500 text-neutral-900 cursor-pointer disabled:bg-emerald-800 disabled:cursor-not-allowed"
           disabled={isSolving}
           onClick={(e) => {
             e.preventDefault();
@@ -102,6 +120,18 @@ function ControlPanel({
           }}
         >
           {isSolving ? <p className="animate-pulse">Solving</p> : "Solve"}
+        </button>
+        <button
+          className="outline rounded-lg bg-rose-500 text-neutral-900 cursor-pointer disabled:bg-rose-800 disabled:cursor-not-allowed"
+          disabled={
+            isSolving || initialState.join(",") === boardState.join(",")
+          }
+          onClick={(e) => {
+            e.preventDefault();
+            setBoardState(initialState);
+          }}
+        >
+          Reset
         </button>
       </div>
     </form>
