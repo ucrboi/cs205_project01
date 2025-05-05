@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Board from "./components/Board";
 import ControlPanel from "./components/ControlPanel";
 import BoardInput from "./components/BoardInput";
 
-const finalState = [1, 2, 3, 4, 5, 6, 7, 8, -1];
-
 function App() {
-  const [boardState, setBoardState] = useState(finalState);
+  const [boardState, setBoardState] = useState<number[]>([]);
   const [initialState, setInitialState] = useState(boardState);
   const [isEditing, setIsEditing] = useState(false);
   const [isSolving, setIsSolving] = useState(false);
+  const [size, setSize] = useState(9);
+
+  useEffect(() => {
+    const goalState = Array.from({ length: size - 1 }, (_, i) => i + 1);
+    goalState.push(-1);
+    setBoardState([...goalState]);
+  }, [size]);
 
   return (
     <div className="w-screen min-h-screen p-5 md:px-[20%] flex flex-col gap-y-4">
@@ -41,6 +46,8 @@ function App() {
         setIsEditing={setIsEditing}
         isSolving={isSolving}
         setIsSolving={setIsSolving}
+        size={size}
+        setSize={setSize}
       />
     </div>
   );

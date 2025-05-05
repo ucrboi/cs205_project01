@@ -16,6 +16,8 @@ interface ControlPanelProps {
   setIsEditing: Dispatch<SetStateAction<boolean>>;
   isSolving: boolean;
   setIsSolving: Dispatch<SetStateAction<boolean>>;
+  size: number;
+  setSize: Dispatch<SetStateAction<number>>;
 }
 
 function ControlPanel({
@@ -28,6 +30,8 @@ function ControlPanel({
   setIsEditing,
   isSolving,
   setIsSolving,
+  size,
+  setSize,
 }: ControlPanelProps) {
   const algRef = useRef<HTMLSelectElement>(null);
 
@@ -74,9 +78,21 @@ function ControlPanel({
 
   return (
     <form className="flex flex-col gap-6">
-      <div className="flex gap-4 w-full justify-center">
+      <div className="grid grid-cols-3 gap-4 w-full justify-center">
+        <select
+          className="col-span-1 outline outline-cyan-500 text-cyan-200 disabled:outline-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed border-x-8 border-transparent rounded-lg p-2"
+          onChange={(e) => {
+            if (e.target.value) {
+              setSize(Number(e.target.value));
+            }
+          }}
+        >
+          <option value={9}>8-puzzle</option>
+          <option value={16}>15-puzzle</option>
+          <option value={25}>24-puzzle</option>
+        </select>
         <button
-          className="p-2 rounded-lg w-50 cursor-pointer border text-amber-300 border-amber-300 disabled:border-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg cursor-pointer border text-amber-300 border-amber-300 disabled:border-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={(e) => {
             e.preventDefault();
             const arr = randomOrderGenerator(n);
@@ -89,7 +105,7 @@ function ControlPanel({
         </button>
         {!isEditing && (
           <button
-            className="p-2 rounded-lg w-50 cursor-pointer border border-teal-300 disabled:border-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed text-teal-200"
+            className="p-2 rounded-lg cursor-pointer border border-teal-300 disabled:border-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed text-teal-200"
             onClick={(e) => {
               e.preventDefault();
               setIsEditing(!isEditing);
@@ -103,7 +119,7 @@ function ControlPanel({
       <div className="grid grid-cols-3 gap-4">
         <select
           className="col-span-1 outline outline-emerald-500 text-emerald-200 disabled:outline-gray-500 disabled:text-gray-500 disabled:cursor-not-allowed border-x-8 border-transparent rounded-lg p-2"
-          disabled={isSolving}
+          disabled={size !== 9 || isSolving}
           ref={algRef}
         >
           <option value="">Select an algorithm</option>
@@ -113,7 +129,7 @@ function ControlPanel({
         </select>
         <button
           className="outline rounded-lg bg-emerald-500 text-neutral-900 cursor-pointer disabled:bg-emerald-800 disabled:cursor-not-allowed"
-          disabled={isSolving}
+          disabled={size !== 9 || isSolving}
           onClick={(e) => {
             e.preventDefault();
             solvePuzzle();
@@ -124,7 +140,9 @@ function ControlPanel({
         <button
           className="outline rounded-lg bg-rose-500 text-neutral-900 cursor-pointer disabled:bg-rose-800 disabled:cursor-not-allowed"
           disabled={
-            isSolving || initialState.join(",") === boardState.join(",")
+            size !== 9 ||
+            isSolving ||
+            initialState.join(",") === boardState.join(",")
           }
           onClick={(e) => {
             e.preventDefault();
@@ -134,6 +152,7 @@ function ControlPanel({
           Reset
         </button>
       </div>
+      {size !== 9 && <p>Solving disabled due to memory constraints</p>}
     </form>
   );
 }

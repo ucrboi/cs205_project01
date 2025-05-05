@@ -13,17 +13,15 @@ const spring = {
 };
 
 function Board({ n, boardState }: BoardProps) {
-  const [boardSize, setBoardSize] = useState<number>(n);
+  const [colLength, setColLength] = useState<string>("");
 
   useEffect(() => {
-    setBoardSize(n);
+    setColLength(`grid-cols-${n}`);
   }, [n]);
 
   return (
     <div
-      className={`grid ${
-        boardSize === 3 ? "grid-cols-3" : "grid-cols-4"
-      } gap-1 w-[50vw] md:w-[30vw]  aspect-square mx-auto mb-14`}
+      className={`grid ${colLength} gap-1 w-[50vw] md:w-[30vw]  aspect-square mx-auto mb-14`}
     >
       {boardState.map((t) => {
         if (t === -1) {
