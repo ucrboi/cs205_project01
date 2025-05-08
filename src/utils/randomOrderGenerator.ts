@@ -18,7 +18,7 @@ export function isSolvable(arr: number[]): boolean {
     return inversions % 2 === 0;
   } else {
     //Even board size
-    return (inversions + Math.floor(blankIndex / boardSize)) % 2 === 0;
+    return (inversions + Math.floor(blankIndex / boardSize)) % 2 !== 0;
   }
 }
 
