@@ -106,7 +106,7 @@ export function generalSearch(
           ? performance.now()
           : Date.now();
       const elapsedMs = t1 - t0;
-      console.log(`A* search finished in ${elapsedMs.toFixed(2)} ms`);
+      console.log(`Search finished in ${elapsedMs.toFixed(2)} ms`);
 
       // Trace path from the goal state back up to the initial state
       const path: number[][] = [];
