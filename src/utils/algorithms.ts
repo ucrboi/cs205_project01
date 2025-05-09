@@ -52,6 +52,12 @@ export function generalSearch(
   initialState: number[],
   heuristic: (state: number[], goal: number[]) => number
 ) {
+  // Start timing
+  const t0 =
+    typeof performance !== "undefined" && typeof performance.now === "function"
+      ? performance.now()
+      : Date.now();
+
   const goal = getGoalState(initialState.length);
   const n = Math.sqrt(initialState.length);
 
@@ -93,6 +99,15 @@ export function generalSearch(
 
     // If we have found the goal state
     if (isGoal(node.state, goal)) {
+      // End timing
+      const t1 =
+        typeof performance !== "undefined" &&
+        typeof performance.now === "function"
+          ? performance.now()
+          : Date.now();
+      const elapsedMs = t1 - t0;
+      console.log(`A* search finished in ${elapsedMs.toFixed(2)} ms`);
+
       // Trace path from the goal state back up to the initial state
       const path: number[][] = [];
       let cur: Node | null = node;
