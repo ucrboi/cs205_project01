@@ -38,8 +38,7 @@ function ControlPanel({
   const solvePuzzle = () => {
     setIsSolving(true);
     setInitialState(boardState);
-    console.clear();
-    console.log("Solving...");
+    console.log("Solving ==================");
     const algorithm = algRef.current?.value;
 
     if (!algorithm) {
@@ -64,7 +63,8 @@ function ControlPanel({
     console.log(title);
     console.log(`Expanded: ${result?.expandedNodes}`);
     console.log(`Depth:    ${result?.solutionDepth}`);
-    console.log("Solved");
+    console.log("Solved ==================");
+    console.log("\n");
 
     result?.solutionPath.forEach((state, index, array) => {
       setTimeout(() => {

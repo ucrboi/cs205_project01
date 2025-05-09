@@ -82,6 +82,7 @@ export function generalSearch(
   explored.set(initialState.join(","), 0);
   queue.insert(initialNode);
 
+  // loop
   while (!queue.isEmpty()) {
     const node = queue.extractMin()!;
     const key = node.state.join(",");
@@ -173,6 +174,10 @@ export function generalSearch(
       }
     }
   }
+
+  // return Failure
+  // The code is guarenteed to never reach here because all the inputs
+  // provided are completely solvable and the algorithm would always find a solution
 }
 
 function getGoalState(length: number) {
