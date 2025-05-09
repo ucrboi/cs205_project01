@@ -16,12 +16,10 @@ function BoardInput({
   setInitialState,
   setIsEditing,
 }: BoardInputProps) {
-  const [colLength, setColLength] = useState<string>("");
   const [inputs, setInputs] = useState<string[]>(Array(n * n).fill(""));
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    setColLength(`grid-cols-${n}`);
     setInputs(boardState.map((s) => `${s}`));
     setError("");
   }, [n, boardState]);
@@ -70,7 +68,10 @@ function BoardInput({
 
   return (
     <div className="flex flex-col items-center space-y-4">
-      <div className={`grid ${colLength} gap-1 w-[50vw] aspect-square mx-auto`}>
+      <div
+        className={`grid  gap-1 w-[50vw] aspect-square mx-auto`}
+        style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
+      >
         {inputs.map((value, i) => (
           <input
             key={i}

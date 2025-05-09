@@ -122,7 +122,6 @@ function ControlPanel({
           disabled={size !== 9 || isSolving}
           ref={algRef}
         >
-          <option value="">Select an algorithm</option>
           <option value="ucs">Uniform Cost Search</option>
           <option value="misplaced">A* (Misplaced Tile)</option>
           <option value="manhattan">A* (Manhattan Distance)</option>

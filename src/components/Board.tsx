@@ -1,5 +1,4 @@
 import * as motion from "motion/react-client";
-import { useState, useEffect } from "react";
 
 interface BoardProps {
   n: number;
@@ -13,15 +12,10 @@ const spring = {
 };
 
 function Board({ n, boardState }: BoardProps) {
-  const [colLength, setColLength] = useState<string>("");
-
-  useEffect(() => {
-    setColLength(`grid-cols-${n}`);
-  }, [n]);
-
   return (
     <div
-      className={`grid ${colLength} gap-1 w-[50vw] md:w-[30vw]  aspect-square mx-auto mb-14`}
+      className={`grid gap-1 w-[50vw] md:w-[30vw]  aspect-square mx-auto mb-14`}
+      style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
     >
       {boardState.map((t) => {
         if (t === -1) {
